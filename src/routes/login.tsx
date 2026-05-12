@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { signIn } from "@/lib/auth.functions";
 
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const signInFn = useServerFn(signIn);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,6 +34,7 @@ function LoginPage() {
         setStatus({ kind: "error", msg: res.error });
         return;
       }
+      await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
       await router.invalidate();
       navigate({ to: "/" });
     } catch (err) {
