@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { getCurrentUser, signOut } from "@/lib/auth.functions";
 import { submitEntry } from "@/lib/entries.functions";
 
@@ -46,6 +46,12 @@ function HomePage() {
   const [form, setForm] = useState(blankForm);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
 
+  useEffect(() => {
+    if (!userQuery.isLoading && !userQuery.data?.email) {
+      navigate({ to: "/login" });
+    }
+  }, [userQuery.isLoading, userQuery.data?.email, navigate]);
+
   if (userQuery.isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">
@@ -55,8 +61,11 @@ function HomePage() {
   }
 
   if (!userQuery.data?.email) {
-    if (typeof window !== "undefined") navigate({ to: "/login" });
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">
+        Redirecting to sign in…
+      </div>
+    );
   }
 
   const email = userQuery.data.email;
